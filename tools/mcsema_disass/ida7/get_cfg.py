@@ -1359,7 +1359,7 @@ def identify_program_entrypoints(func_eas):
   DEBUG("Looking for entrypoints")
   DEBUG_PUSH()
 
-  exclude = set(["_start", "__libc_csu_fini", "__libc_csu_init", "main",
+  exclude = set(["_start", "_start_c", "__libc_csu_fini", "__libc_csu_init", "main",
                  "__data_start", "__dso_handle", "_IO_stdin_used",
                  "_dl_relocate_static_pie"])
 
