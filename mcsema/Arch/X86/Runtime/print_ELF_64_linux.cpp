@@ -78,6 +78,7 @@ static void PrintStoreFlags(FILE * out) {
 
 static void PrintLoadFlags(FILE * out) {
   // FPU control.
+  fprintf(out, "  mov edx, 0xf7f\n");
   fprintf(out, "  push dx\n");
   fprintf(out, "  fldcw WORD PTR [rsp]\n");
   fprintf(out, "  pop WORD PTR [rdi + %" PRIuMAX "]\n", __builtin_offsetof(State, x87.fxsave.cwd));

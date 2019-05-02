@@ -73,6 +73,52 @@ CR8Reg gCR8;
 //   return &(__mcsema_stack.bytes[kStackSize - 16UL]);
 // }
 
+
+Memory *__remill_async_hyper_call(
+		State &state, addr_t ret_addr, Memory *mem) {
+#if ADDRESS_SIZE_BITS == 64
+  auto rax = state.gpr.rax.qword;
+  auto rdi = state.gpr.rdi.qword;
+  auto rsi = state.gpr.rsi.qword;
+  auto rdx = state.gpr.rdx.qword;
+  auto r10 = state.gpr.r10.qword;
+  auto r8  = state.gpr.r8.qword;
+  auto r9  = state.gpr.r9.qword;
+#endif
+  // TODO add support for 32bit
+
+  switch (state.hyper_call) {
+#if ADDRESS_SIZE_BITS == 64	  
+    case AsyncHyperCall::kX86SysCall: {
+      unsigned long retval = 0;
+      register uint64_t arg4 asm("r10") = r10;
+      register uint64_t arg5 asm("r8") = r8;
+      register uint64_t arg6 asm("r9") = r9;
+
+      asm volatile(
+        "syscall"
+        : "=a"(retval)
+        : "a"((unsigned long)rax),
+          "D"((unsigned long)rdi),
+          "S"((unsigned long)rsi),
+          "d"((unsigned long)rdx)
+	: "memory", "r10", "r8", "r9"
+      );
+
+      state.gpr.rax.qword = retval;
+      break;
+      }
+#endif      
+
+    case AsyncHyperCall::kX86SysEnter:
+      // TODO add support for sysenter 64bit and 32bit
+    default:
+      __builtin_unreachable();
+  }
+
+  return mem;
+}
+
 Memory *__remill_sync_hyper_call(
     State &state, Memory *mem, SyncHyperCall::Name call) {
   auto eax = state.gpr.rax.dword;
